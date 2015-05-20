@@ -10,6 +10,8 @@ var num=0;
 var asked=[];
 var num;
 var scores=[[0,0],[0,0],[0,0],[0,0]];
+var gonext=false;
+var canscore=false;
 
 
 function flogin() {
@@ -149,24 +151,34 @@ function showPwX() {
 
 		//create a 'block' for each picture with all of the relevant inputs and text, etc.
 		$.when(
-			$("#pics").append("<div id='pic" + i + "' style='float:left;' class='image'><img id='img" + i + "' src=" + myurl + " alt='flicker pic #" + i + "' class='img-responsive'><div id='question" + i + "' class='question " + i + "'>" + question + "</div><div id='hider" + i + "' class='hider'><p>Move the cursor here to examine the photo better.</p></div><div id='response" + i + "' class='response container " + i + "' style='z-index:9'><form role='form'><label class='radio-inline'><input type='radio' name='optradio'>" + response1 + "</label><label class='radio-inline'><input type='radio' name='optradio'>" + response2 + "</label><label class='radio-inline'><input type='radio' name='optradio'>Pass. It\'s too hard to tell.</label></form></div><div id='exif" + i + "' class='exif " + i + "'>" + "<ul><li>ISO:" + mypic.ISO + "</li><li>Exposure:" + mypic.ExposureTime + "</li><li>f/number:" + mypic.FNumber + "</li><li>Flash:" + mypic.Flash + "</li>" + "</ul></div><div id='feedback" + i + "' class='feedback " + i + "'>" + feedback + "</div><div id='selfscore" + i + "' class='selfscore container " + i + "'style='z-index:9><p>how would you rate your answer?</p><form role='form'><label class='radio-inline'><input type='radio' name='optradio' id='plusone" + i + "'>I was right.</label><label class='radio-inline'><input type='radio' name='optradio'>Not quite right.</label><label class='radio-inline'><input type='radio' name='optradio' id='pass" + i + "'>Pass. It was too hard to tell.</label></form></div></div>"),
+			$("#pics").append("<div id='pic" + i + "' style='float:left;' class='image row '><img id='img" + i + "' src=" + myurl + " alt='flicker pic #" + i + "' class='img-responsive center-block'><div id='question" + i + "' class='question " + i + "'>" + question + "</div><div id='hider" + i + "' class='hider'><p>Move the cursor here to examine the photo better.</p></div><div id='response" + i + "' class='response container " + i + "' style='z-index:9'><form role='form'><label class='radio-inline'><input type='radio' name='optradio'>" + response1 + "</label><label class='radio-inline'><input type='radio' name='optradio'>" + response2 + "</label><label class='radio-inline'><input type='radio' name='optradio'>Pass. It\'s too hard to tell.</label></form></div><div id='exif" + i + "' class='exif " + i + "'>" + "<ul><li>ISO:" + mypic.ISO + "</li><li>Exposure:" + mypic.ExposureTime + "</li><li>f/number:" + mypic.FNumber + "</li><li>Flash:" + mypic.Flash + "</li>" + "</ul></div><div id='feedback" + i + "' class='feedback " + i + "'>" + feedback + "</div><div id='selfscore" + i + "' class='selfscore container " + i + "'style='z-index:9><p>how would you rate your answer?</p><form role='form'><label class='radio-inline'><input type='radio' name='optradio' id='plusone" + i + "'>I was right.</label><label class='radio-inline'><input type='radio' name='optradio' id='miss" + i + "'>Not quite right.</label><label class='radio-inline'><input type='radio' name='optradio' id='pass" + i + "'>Pass. It was too hard to tell.</label></form></div></div></div>"),
 			//above block used tips from https://css-tricks.com/text-blocks-over-image/
 
 			$("." + i).hide(),
 			$("#hider" + i).hide(),
-			$("#img" + i).fadeTo(5, .3),
+			$("#img" + i).fadeTo(500, .3),
 			$('html, body').animate({
 				scrollTop: $("#pic" + i).offset().top
-			}, 1000, 'swing')
+			}, 500, 'swing')
 		).then(function() {
 			$("#status").text("here comes your first question");
 			$("#status").css("color", "White");
 			if(i + 1 == picswX.length) {
-				$("." + i).css('zIndex', 9999);
-				quiz();
+				console.log("show triggering quiz");
+				gonext=true;
+				meter("show");
 			};
 		});
 	});
+	return false;
+}
+
+function meter(source){
+	console.log("meter called from"+source);
+	if (gonext){
+		gonext=false;
+		quiz();
+	}
 	return false;
 }
 
@@ -182,58 +194,75 @@ function quiz() {
 	$.when(
 		$('html, body').animate({
 			scrollTop: $("#pic" + num).offset().top
-		}, 1000, 'swing'),
-		$("#img" + num).fadeTo(5, .5),
+		}, 2000, 'swing'),
+		$("#img" + num).fadeTo(1000, .5),
 		$("#status").hide(),
-		$("." + num).fadeTo(5, .01),
-		$("#question" + num).fadeTo(5, 1),
-		$("#response" + num).fadeTo(5, 1),
-		$("#hider" + num).show()
+		$("." + num).fadeTo(1000, .01),
+		$("#question" + num).fadeTo(1000, 1),
+		$("#response" + num).fadeTo(1000, 1),
+		$("#hider" + num).show(1000)
 	).then(function() {
 		console.log("scrolled to next pic");
 	});
 
 	$("#hider" + num).mouseenter(function() {
 			$("." + num).hide();
-			$("#img" + num).fadeTo(5, 1);
+			$("#img" + num).fadeTo(200, 1);
 		})
 		.mouseleave(function() {
 			$("." + num).show();
 			$('html, body').animate({
 				scrollTop: $("#pic" + num).offset().top
-			}, 50, 'swing', function() {
-				$("#img" + num).fadeTo(5, .5);
+			}, 100, 'swing', function() {
+				$("#img" + num).fadeTo(500, .5);
 			});
 		});
 
 	$(".response").change(function() {
-		$("#exif" + num).fadeTo(5, 1);
-		$("#feedback" + num).fadeTo(5, 1);
-		$("#selfscore" + num).fadeTo(5, 1);
+		$("#exif" + num).fadeTo(500, 1);
+		$("#feedback" + num).fadeTo(500, 1);
+		$("#selfscore" + num).fadeTo(500, 1);
 	});
 
 	$(".selfscore").change(function() {
 		if($('#plusone'+num).prop('checked')){
+			$('#plusone'+num).prop('checked',false);
 			scores[num%3][0]+=1;
+			gonext=true;
+			canscore=true;
+		}
+		if($('#miss'+num).prop('checked')){
+			$('#miss'+num).prop('checked',false);
+			gonext=true;
+			canscore=true;
 		}
 		if($('#pass'+num).prop('checked')){
-			scores[num%3][0]+=1;
+			$('#pass'+num).prop('checked',false);
+			gonext=true;
 		}
-		scores[num%3][1]+=1;
-		scores[3][1]+=1;
-		scores[3][0]=scores[0][0]+scores[1][0]+scores[2][0];
-		$("#ISOscore").text("ISO: "+scores[0][0]+"/"+scores[0][1]);
-		$("#FNscore").text("f/Number: "+scores[1][0]+"/"+scores[1][1]);
-		$("#Shutterscore").text("Exposure: "+scores[2][0]+"/"+scores[2][1]);
-		$("#total").text("Total Score: "+scores[3][0]+"/"+scores[3][1]);
-		$("#status").text("selecting next question")
-		$("#status").show();
-		$("." + num).hide();
-		$("#img" + num).fadeTo(5, .3);
-		num += 1;
-		quiz();
+		if (canscore){
+			scores[num%3][1]+=1;
+			scores[3][1]=scores[0][1]+scores[1][1]+scores[2][1];
+			scores[3][0]=scores[0][0]+scores[1][0]+scores[2][0];
+			$("#ISOscore").text("ISO: "+scores[0][0]+"/"+scores[0][1]);
+			$("#FNscore").text("f/Number: "+scores[1][0]+"/"+scores[1][1]);
+			$("#Shutterscore").text("Exposure: "+scores[2][0]+"/"+scores[2][1]);
+			$("#total").text("Total Score: "+scores[3][0]+"/"+scores[3][1]);
+			$("#status").text("selecting next question");
+			canscore=false;
+		}	
+		$.when(
+			$("#status").show(),
+			$("." + num).hide(),
+			$("#img" + num).fadeTo(500, .3)
+		).then(function(){
+			if(asked.length<picswX.length-1){
+				console.log("quiz triggering meter");
+				meter("quiz");
+			}	
+		});
 	});
 	// https://css-tricks.com/text-blocks-over-image/
 
-	return false;
+return false;
 }
